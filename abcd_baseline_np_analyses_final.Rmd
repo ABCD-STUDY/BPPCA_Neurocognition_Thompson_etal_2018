@@ -1,0 +1,932 @@
+---
+title: 'The structure of cognition in 9 and 10 year-old children and associations with problem behaviors: Findings from the ABCD study’s baseline neurocognitive battery'
+date: "`r format(Sys.time(), '%d %B %Y')`"
+author: "Wesley K. Thompson^1^, Deanna M. Barch^2^, James M. Bjork^3^, Raul Gonzalez^4^, Bonnie J. Nagel^5^, Sara Jo Nixon^6^, Monica Luciana^7^"
+output:
+  word_document: 
+    reference_docx: template.docx
+bibliography: bibliography.bib
+csl: nature.csl
+---
+
+^1^Division of Biostatistics, Department of Family Medicine and Public Health, University of California,
+San Diego, La Jolla, CA 92093
+
+^2^Departments of Psychological & Brain Sciences, Psychiatry and Radiology, Washington University, St. Louis, MO 63130
+
+^3^Institute for Drug and Alcohol Studies, Department of Psychiatry, Virginia Commonwealth University, Richmond, VA  23219
+
+^4^Center for Children and Families, Department of Psychology, Florida International University, Miami, FL 33199
+
+^5^Departments of Psychiatry & Behavioral Neuroscience, Oregon Health & Science University, Portland, OR 97239
+
+^6^Department of Psychiatry, University of Florida, Gainesville FL 32611
+
+^7^Department of Psychology, University of Minnesota, Minneapolis MN 55455
+
+
+```{r setup, warning = FALSE, message = FALSE, include = FALSE}
+# List of packages required for this analysis
+pkg <- c("knitr", "data.table", "xtable", "kableExtra","tableone")
+
+# Check if packages are not installed and assign the
+# names of the packages not installed to the variable new.pkg
+new.pkg <- pkg[!(pkg %in% installed.packages())]
+
+# If there are any packages in the list that aren't installed,
+# install them
+if (length(new.pkg)) {
+  install.packages(new.pkg, repos = "http://cran.rstudio.com")
+}
+
+# Load the packages into R
+require(knitr)
+require(data.table)
+require(xtable)
+require(kableExtra)
+require(tableone)
+require(knitcitations)
+require(gamm4)
+require(grid)
+require(gridGraphics)
+require(compareGroups)
+cleanbib()
+options("citation_format" = "pandoc")
+knitr::opts_chunk$set(echo = TRUE)
+
+load("r_code/figures_and_tables/bppca_tables_final.RData")
+B = dim(beta.boot)[3]
+```
+
+# Abstract
+
+The Adolescent Brain Cognitive Development (ABCD) study is poised to be the largest single-cohort long-term longitudinal
+study of neurodevelopment and
+child health in the United States. Baseline data on $N=$ 4,521 children aged 9-10 were released for public access
+on November 2, 2018. In this paper we performed principal component analyses of the neurocognitive assessments
+administered to the baseline sample. The neurocognitive battery included seven measures from the NIH Toolbox as
+well as five other tasks. We implemented a Bayesian Probabilistic Principal Components Analysis (BPPCA) model that
+incorporated nesting of subjects within families and within data collection sites.
+We extracted varimax-rotated component scores from a three-component model and associated these scores with parent-rated
+Child Behavior Checklist (CBCL) internalizing, externalizing, and stress reactivity. We found evidence for three broad
+components that encompass general cognitive ability, executive function, and learning/memory. These were significantly
+associated with CBCL scores in a differential manner but with small effect sizes.
+These findings set the stage for longitudinal analysis of neurocognitive and psychopathological data from the ABCD
+cohort as they age into the period of maximal adolescent risk-taking.
+
+181 words
+
+# Key Words
+
+Adolescence / Neurocognition / NIH Toolbox / Principal components analysis / Child behavior checklist / Externalizing / Internalizing / Stress reactivity
+
+# Introduction
+
+Adolescence is a period of pronounced developmental change, including physical maturation due to puberty,
+changes in cortical volume and white matter microstructure, a redirection of socioemotional strivings toward
+peer groups, and improvements in executive function, attention, and processing speed. While these
+transitions are generally viewed as positive, adolescence is also a period of vulnerability given that major
+mental illnesses can have their onset during this time. Understanding the links between cognitive development
+and these vulnerabilities in an epidemiologically-informed sample of adolescents is important for
+structuring the timing of interventions and prevention efforts.
+
+This paper utilized data from a large, ongoing nationally-representative cohort, the Adolescent Brain Cognitive Development
+(ABCD) Study, conceived and funded by the United States’ National Institutes of Health, to determine how cognitive
+processes in this age group are structured and how they relate to trait-level vulnerabilities, such as internalizing
+and externalizing tendencies, that are often associated with later risk-taking behaviors and emotional distress. 
+
+Individual differences in cognitive abilities can take many forms, including variation in intellectual capacity (e.g., IQ),
+attention, cognition-emotion integration, decision-making, memory, and executive function. When ABCD was conceptualized, the
+consortium was tasked with measuring neurocognitive abilities across this diverse array of functions in a maximally efficient
+manner with minimal subject burden. For the baseline assessment, this goal was achieved through the use of an automated task
+battery that includes the NIH Toolbox measures of cognition (seven subtasks), the Matrix Reasoning task from the Wechsler
+Intelligence Scale for Children, the Rey Auditory Verbal Learning test (RAVLT), and a measure of spatial reasoning,
+the Little Man Task (see @luciana2018adolescent for detailed task descriptions). While these measures were selected because they seemingly
+reflect distinct cognitive abilities, it may be that relatively few latent dimensions underlie performance across tasks,
+and these may dynamically change with development.
+
+Accordingly, the structure of cognition, as assessed through factor analytic approaches
+[@miyake2012nature;@friedman2017unity;@brydges2014differentiation;@mungas2013vii] is thought to change
+markedly between early childhood and adolescence. Efforts to understand the nature of this change have primarily focused on
+measures of executive functions (EF), their development, and differentiation over time. One influential model [@miyake2012nature] based on
+laboratory-based measures of non-affective EF suggests that three latent constructs (working memory updating,
+inhibitory control, cognitive flexibility) underpin EF, and these are related, given that the three components
+correlate moderately with one another, and distinct, given that a single component is not adequate in explaining the overall
+variance in adult EF.  This does not appear to be the case in young children. In children ages 3 to 6, a single factor emerges as the
+best-fitting model in confirmatory factor analyses of cognitive task data [@visu2007dimensions;@wiebe2011structure;@mungas2013vii].
+In adolescents aged 13 and older [@xu2013developmental] and in young adults [@mungas2014factor], the three factor structure of EF
+is more clearly evident, consistent with the notion that neural substrates of these functions consist of a series of
+overlapping but partially distinct networks [@mckenna2017informing].
+
+The dimensional structure of cognition in middle childhood is complex and not easily discernible, because most studies have
+tended to combine pre-adolescents with older or younger children, leading to inconsistent findings. For instance, (@lehto2003dimensions)
+studied 8-13 year-olds using tasks from the CANTAB battery and found, via exploratory and confirmatory factor analysis, evidence
+for three distinct EF factors. In contrast, (@xu2013developmental) examined a sample of 457 7-15 year-old Chinese children from low
+SES backgrounds and found that a single factor explained performance in 7-9 and 10-12 year-olds but a three-factor structure
+emerged by ages 13-15.  Some studies, while reporting a multi-dimensional structure of EF, indicate that measures of inhibitory
+control do not cohere during childhood and adolescence despite the emergence of working memory and shifting/flexibility
+factors [@huizinga2006age].  In a study of 102 8-15 year-olds who completed the Iowa Gambling Task, a Color Word Stroop task,
+a Delay Discounting task, and a Digit Span task, an exploratory factor analysis indicated that performance could
+be explained by a single factor [@prencipe2011development].
+
+Nevertheless, these findings have led to the differentiation hypothesis, which states that the structure of cognition becomes
+more differentiated as development advances [@shing2010memory;@mungas2013vii] and that the observed correlations among multiple
+factors (if they emerge) diminishes with age.  A difficulty in evaluating and replicating this literature is that there
+is little consensus regarding which tasks are optimal within and across age groups to address the differentiation hypothesis.
+Studies that have utilized the NIH Toolbox together with other validation measures [@mungas2013vii] to assess the structure of cognition
+have found fewer factors, even above and beyond the construct of EF, in young children, ages 3-6 relative to 8-15 year-olds,
+though the same measures were not utilized across groups. In young children who were administered eleven total measures, three
+factors emerged that appeared to reflect vocabulary knowledge, reading, and fluid reasoning skills. Conventional EF
+tasks loaded together onto the fluid reasoning factor. In contrast, five factors were evident in 8-15 year-olds, though
+this group completed fifteen total measures. Fluid reasoning skills differentiated into episodic memory, working memory,
+and executive function. 
+
+Beyond the realm of EF,  the differentiation hypothesis has also been studied in relation to aspects of general intellect,
+including crystallized and fluid abilities.
+[@li2004lifespan] assessed 291 individuals who were represented by six age groups ranging from 6 to 89 years of age and who
+completed a battery of intellectual assessments. Associations between crystallized and fluid reasoning measures in
+adolescent (ages 12-17), young adult, and middle adult groups were smaller in magnitude than those observed in young
+children (ages 6-11) and older adults. The lifespan perspective of this report is unique in suggesting differentiation of ability
+into middle adulthood with de-differentiation in old age.
+
+The ABCD study provides an opportunity to further assess the differentiation hypothesis in the span between middle childhood
+and early adulthood given its longitudinal design and the use of measures of cognition that encompass aspects of working memory,
+inhibitory control, and cognitive flexibility as well as episodic memory, spatial reasoning,  oral reading, and verbal intellect. 
+In addition, the current examination
+of cognitive function in the ABCD study may also inform risk prediction models for mental disorders and problem behaviors more broadly.
+For example, meta-analytic findings suggest that different mental illnesses share common cognitive abnormalities as well as common
+neural substrates [@goodkind2015identification;@mcteague2017identification], including regions involved in emotion regulation [@peters2016cortico], 
+response inhibition [@aron2014inhibition], and conflict monitoring [@ridderinkhof2004role].
+Moreover, many mental illnesses tend to show impaired behavioral inhibition in laboratory performance tasks [@mcteague2016transdiagnostic],
+and it has been argued that deficits in executive function may be a general risk factor for psychopathology
+[@mcteague2017identification;@mcteague2016transdiagnostic]. Thus, cross-sectional studies
+suggest that different facets of neurocognitive performance could underpin, or be markers for, broader emotional and behavioral
+dysregulation, that could in turn confer risk for substance use disorder and other mental illnesses [@belcher2014personality].
+For instance, the early initiation of substance use is associated with high levels of externalizing tendencies
+[@dodge2009dynamic;@king2004childhood;@mcgue2001origins], which are also associated with an
+increased risk for substance use disorders [@marmorstein2001investigation;@riggs1995depression].
+Moreover, high levels of externalizing behavior are robustly associated, even
+from a preschool age, with executive dysfunction [@schoemaker2013executive;@woltering2016executive;@young2009behavioral].
+One of these studies, a meta-analysis of twenty-two studies including an overall sample of 4025 preschoolers,
+found a modest association between externalizing and overall EF (effect size r = 0.22) [@schoemaker2013executive].
+Another smaller study [@woltering2016executive] reported an association primarily with “hot” EF measures.  A large-scale meta-analysis of 14,786
+antisocial individuals [@ogilvie2011neuropsychological] found significant variation in effect sizes across studies; the largest effects were
+observed between criminality and EF ($d=0.54$). A recent special issue focused on associations between externalizing and EF
+[@sulik2017introduction] emphasizes through a number of longitudinal studies that strong EF ability buffers against later externalizing
+behaviors in vulnerable children. Similar studies that have examined cognition beyond EF are relatively sparse, though a
+recent population-based study of over 1100 children from the Generation R cohort [@blanken2017cognitive] reported associations
+between mother-reported CBCL scores and cognition as measured by the NEPSY-II, administered over one year later. Externalizing
+was significantly associated with poor attention/executive function as well as with poor sensorimotor function.
+Internalizing, which has been associated in case-control studies with executive dysfunction [@klimes2016regulatory], was associated with
+poor attention, poor executive functioning, decrements in language skills and poor memory and learning.
+All associations were small in magnitude after adjusting for potential confounds (coeff =-0.05 to 0.11).
+
+Thus, associations among cognitive function, externalizing, internalizing, and problem behaviors are important to quantify developmentally,
+before the onset of risk-taking behaviors such as substance misuse. Important steps are to quantify baseline levels of cognitive function
+in a large epidemiological early adolescent cohort in the context of a planned prospective assessment, to determine how cognition is
+structured in this group, and to associate major domains of cognition with externalizing and internalizing traits. Finally, associations
+between cognition and problem behaviors are influenced by socioeconomic factors [@atherton2016risk;@deater1998multiple;@lawson2018meta;@whitesell2013familial],
+which are often difficult to model in the context of small sample studies and difficult to interpret in the absence of longitudinal assessment.
+The detailed assessment of socioeconomic factors and the large sample size of ABCD make it possible to address this concern.
+
+Indeed, the sample size of ABCD is large enough to reliably detect and accurately estimate even small effects related to cognitive and neural development.
+It will therefore directly address the over-estimation of effect sizes and
+the replication crisis inflicting current neuroscience research [@button2013power]. Moreover, ABCD will collect data on a rich variety of genetic,
+environmental, and biomarker-based measures germane to neurocognition, substance use, and mental health, enabling the construction of realistically-complex
+etiological models incorporating factors from many domains simultaneously. Even if the effects of individual characteristics are small, as has been
+the case in other large epidemiological samples [@klimes2016regulatory;@miller2016multimodal],
+cumulatively they may explain a sizeable proportion of the variation in neurodevelopmental trajectories, a scenario which has recently
+played out in genome-wide association analyses of complex traits [@boyle2017expanded]. 
+
+In the current paper, we performed principal component analyses of the baseline neurocognitive battery, including a within-sample replication,
+to identify latent components that in turn can be related to broader traits of internalizing and externalizing symptomatology.
+Notably, use of component scores mitigates potential method variance that can result from reliance on a single task score as the
+metric for an entire cognitive construct [@snyder2015advancing]. We utilized a Bayesian Probabilistic Principal Components Analysis (BPPCA) that incorporates
+nesting of subjects within families and families within data collection sites to account for these aspects of the ABCD study design.
+We extracted component scores from the model and associated them with Child Behavior Checklist (CBCL) externalizing and
+internalizing symptoms recorded for each participant. Association analyses controlled for demographic and socio-economic factors.
+The validation of the cognitive battery through the BPPCA, and the examination of associations with psychopathology in a large
+epidemiologically-informed sample represent novel elements of this work.
+
+
+# Methods
+
+## The ABCD study design and sample
+
+Information regarding funding agencies, recruitment sites, investigators, and project organization can be
+obtained at http://abcdstudy.org. A baseline cohort of 11,872 children between the ages of
+9-11 (and their parents/guardians) has been recruited across 21 data collection sites
+(see @garavan2018recruiting) and will be followed for at least ten years. The study closely matches the US population
+of 9-10 year-old children on several key demographic variables, including gender, race/ethnicity,
+household income, and parental education and marital status. Thus, ABCD will be capable of estimating US population
+norms of developmental neurocognitive trajectories. The recruitment catchment areas of the 21
+participating sites encompass over 20% of the entire US population of nine and ten year-olds. 
+The sociodemographic sample size targets for the ABCD baseline cohort come from a combination of two sources: 
+1) the American Community Survey (ACS), a large-scale survey of approximately 3.5 million households conducted
+annually by the U.S. Census Bureau; and 2) annual 3rd and 4th grade school enrollment data maintained by the
+National Center for Education Statistics (NCES). The ACS is one of the primary sources of demographic data for
+the nation as a whole and for smaller areas as well. The NCES data sources provide aggregate counts of students
+for simple demographic classifications of children at the school district and individual school level.
+
+At each ABCD data-collection site, participants were predominantly recruited through local elementary and
+charter schools [@garavan2018recruiting]. ABCD employed a probability sampling strategy to identify schools
+within the 21 catchment areas as the primary method for contacting and recruiting eligible children and their
+parents. This method has been utilized within other large national studies (e.g., Monitoring the
+Future [@bachman2011monitoring]; the Add Health Study [@chantala1999national]; the National Comorbidity 
+Replication-Adolescent Supplement [@conway2016association]; the National Education Longitudinal Studies [@ingels1990national]).
+A minority of participants were recruited through non-school-based community outreach
+and word-of-mouth referrals. Twins were recruited from birth registries (see @garavan2018recruiting and
+@iacono2017utility for participant recruitment details). Across recruitment sites, inclusion criteria included
+being in the desired age range (9-10 years of age) and able to provide informed consent (parents) and assent
+(child). Exclusions were minimal and were limited to lack of English language proficiency in the children, the
+presence of severe sensory, intellectual, medical or neurological issues that would impact the validity of
+collected data or the child’s ability to comply with the protocol, and contraindications to MRI scanning.
+Parents must be fluent in either English or Spanish. Sample demographics are presented in Table 1.
+
+## Neurocognitive measures
+
+The neurocognitive battery was designed to be completed in 70 minutes (see @luciana2018adolescent).
+Participants first completed the Snellen vision chart [@snellen1862letterproeven] as a measure of visual
+acuity. Legal blindness (with vision correction) was a study exclusion. A brief handedness inventory,
+consisting of four self-report questions, was also administered [@oldfield1971assessment;@veale2014edinburgh].
+The neurocognitive testing battery, comprised of ten measures, was then initiated [@luciana2018adolescent].
+All tests were administered using an iPad with one-on-one monitoring by a research assistant.
+
+### NIH Toolbox® cognition measures
+
+The NIH Toolbox® cognition measures (herein referred to as “the Toolbox”) were used by ABCD to foster
+harmonization of common data elements across federally funded studies and were developed as part of the NIH
+Blueprint for Neuroscience Research (http://www.nihtoolbox.org). The battery consists of seven different tasks
+that cover episodic memory, executive function, attention, working memory, processing speed, and language
+abilities [@bleck2013nih; @gershon2013nih; @hodes2013nih]. The Toolbox® was normed for samples between the
+ages of 3 and 85 years. The total administration time for the NIH Toolbox® Cognitive battery is approximately
+35 minutes. Despite the availability of a Spanish language version
+[@casaletto2016demographically;@flores2017performance], the ABCD study administers only the English language
+version [@casaletto2015demographically] to youth given that English fluency is an inclusion criterion.
+
+The Toolbox Picture Vocabulary Task® [@gershon2014language; @gershon2013iv] measures language skills and
+verbal intellect. The Toolbox Oral Reading Recognition Task® is a reading test that asks individuals to
+pronounce single words. The Toolbox Pattern Comparison Processing Speed Test®
+[@carlozzi2013vi;@carlozzi2014nih;@carlozzi2015nih] is a measure of rapid visual processing. The Toolbox List
+Sorting Working Memory Test® requires participants to use working memory to sequence task stimuli based on
+category membership and perceptual characteristics. The Toolbox Picture Sequence Memory Test® was modeled after
+memory tests asking children to imitate a sequence of actions using props [@bauer2013iii;@dikmen2014measuring].
+The Toolbox Flanker Task®, a variant of the Eriksen Flanker task [@eriksen1974effects], is a response inhibition/conflict
+monitoring task that measures the ability to modulate responding under congruent versus incongruent stimulus contexts. 
+The Toolbox Dimensional Change Card Sort Task® measures cognitive flexibility [@zelazo2013ii;
+@zelazo2014nih]. Each of the Toolbox® tasks produces a number of scores, some of which are adjusted based on
+participant demographics. All tasks provide raw scores, uncorrected standard scores, and age-corrected standard
+scores [@casaletto2015demographically]. Uncorrected task scores were used in our analyses.
+
+
+### Rey auditory verbal learning test
+
+The Rey Auditory Verbal Learning Test (RAVLT) measures auditory learning, memory, and recognition.
+A customized automated version, created through the Q-interactive platform of Pearson assessments
+[@daniel2014equivalence] was used. This test requires participates to listen to and recall a list of 15
+unrelated words over five learning trials. Following initial learning of the list, a distractor list of 15
+words is presented, and the participant is asked to recall as many words from this second list as he/she is
+able. Next, recall of the initially learned list is assessed. Recall following a 30-min delay (during which
+participants engage in other non-verbal tasks), permits longer term retention to be assessed.
+
+### Little man task
+
+This task engages visual-spatial processing, specifically mental rotation, with varying degrees of difficulty
+[@acker1982bexley]. The task involves the presentation of a rudimentary male figure holding a briefcase in one
+hand in the middle of the screen. The figure may appear in one of four positions; right side up vs. upside down
+and either facing the respondent or with his back to the respondent. The briefcase may be in either the right
+or left hand. Respondents indicate by button press which hand is holding the briefcase. 
+
+### Other measures
+
+Two additional cognitive measures were administered to participants but were not included in our analysis. One
+measure (the Cash Choice Task; see @luciana2018adolescent) is a single-item delay of gratification measure with
+dichotomous scoring. Preliminary analyses suggested that it did not load onto any of the observed factors. The
+second measure, the Matrix Reasoning Task, from the Wechsler Intelligence Test for Children-V (WISC-V 
+[@wechsler2014wechsler]) was administered using automated technology (Q-interactive [@daniel2014equivalence]).
+Standard score distributions (see Table 2) affirm that the sample is normally distributed with respect to fluid
+cognitive abilities. Preliminary analyses indicated that the Matrix Reasoning task scores were distributed
+across all components and that the general PCA solution was equivalent with and without inclusion of
+the task. In the interest of parsimony, we excluded it from our final models. 
+
+## Child behavior checklist
+
+Externalizing and internalizing behaviors were reported by the parent using an automated version of the Child
+Behavior Checklist [@achenbach2009achenbach] (CBCL). The CBCL is comprised of 113 items that measure aspects of
+the child’s behavior across the past six months. This assessment did not include the instrument’s open-ended
+questions but relied on those that could be rated using a three-point rating scale (not true, somewhat or
+sometimes true, very often or always true). Internalizing and externalizing scores are derived from the
+following syndrome scores: anxious/depressed, withdrawn/depressed, somatic complains, social problems, thought
+problems, rule-breaking behavior, and aggressive behavior. Competencies across several social domains are also
+measured.
+
+## Statistical approach
+
+We implemented a principal component analysis (PCA) algorithm on the ABCD neurocognitive battery. 
+We instantiated the PCA algorithm using Bayesian Probabilistic PCA (BPPCA [@tipping1999probabilistic; @bishop1999bayesian])
+with random effects for site and for family to account for correlation among subjects in factor scores and in residuals
+caused by the nested structure of data collection in ABCD. Prior distributions were mildly regularizing for the component
+loading matrix and otherwise minimally informative. Primary advantages of this algorithm include
+posterior credible intervals for component loadings and other parameters that properly account for the
+nested data collection design of ABCD, and model selection metrics for the number of components such
+as the Leave-One-Out Information Criterion [@vehtari2017practical] (LOOIC).
+The model was implemented using the Bayesian inference engine `stan` [@carpenter2017stan] and
+using the `R` package `rstan` [@stan2016rstan] to interface with `R Version 3.4.2` [@Rmanual]. 
+Details of the BPPCA model and the model-fitting algorithm are given in the Supplementary Materials.
+
+The nine neurocognitive measures for the complete-data subjects were first standardized to have zero
+mean and unit variance before being placed into the BPPCA algorithm along with data collection site
+and family membership. A Monte Carlo Markov Chain (MCMC) was run for 1000 iterations on
+each of three chains with random starting values. The first 500 iterations were discarded. 
+Model selection for number of components retained in the model was performed
+using the LOOIC as implemented in the R package `loo`
+[@vehtari2017practical]. After selecting the number $D$ of principal components, the BPPCA solution
+is rotationally invariant. To address this issue, we performed *post hoc* 
+orientation of the loading matrix and component scores using the method
+described in @lockwood2015inferring. Factor loadings and scores were then further rotated using the varimax criterion.
+We report the varimax-rotated solution in the main text and the unrotated and promax-rotated solutions in the Supplementary Materials. 
+We assessed the stability of the chosen model by randomly splitting the data
+in half, running the model on each half separately, and comparing the component loadings across models.
+We also examined the effect of missing data by imputing missing neurocognitive measures and re-running the BPPCA algorithm
+on the completed data.
+
+To examine the association of principal components with CBCL measures, varimax rotated component scores were then 
+extracted for each subject and correlated (Spearman’s rho) with CBCL Internalizing, Externalizing, and Stress
+Reactivity scores. Since these initial correlations did not include consideration
+of demographic factors that might impact observed associations, we  then input the component scores as
+independent variables in Generalized Linear Mixed-effects Models (GLMMs) with CBCL measures as
+dependent variables. GLLMs include age, sex at birth, household income, highest household education,
+race/ethnicity, and household marital status as fixed effects, and with data collection site and family
+as random effects. Missing component scores and demographic variables were imputed to produce
+five completed datasets using the `R` using the package `mice` [@mice].
+GLLMs were implemented in `R` using the package `gamm4` [@wood2014gamm4].
+Results from running the GLLMS across the five imputations were combined using Rubin's formula [@rubin2004multiple].
+
+ <!-- We subsequently performed bootstrap analyses on the imputed datasets to determine if the observed pattern of associations varied significantly across the three CBCL outcomes.  --->
+
+# Results
+
+## Source of the ABCD data 
+
+The ABCD Study's Curated Annual Release 1.1 was made publicly available on November 2, 2018, and can be accessed
+through the NIMH Data Archive (NDA, https://data-archive.nimh.nih.gov/abcd/query/abcd-annual-releases.html). This release contains baseline
+data from $N=$ 4,521 subjects. After obtaining permissions as described there, data files can be downloaded in
+`csv` format; `R` scripts for merging these files and including some initial processing (e.g., computing the
+demographic categories used in this paper) can be found at https://github.com/ABCD-STUDY/analysis-nda17.
+These scripts produce an `.Rds` file which can then be used with the `R`, `stan`, and `R Markdown` scripts
+available online at https://github.com/ABCD-STUDY/ to reproduce the results (and the entire manuscript) 
+presented here precisely.
+
+## Descriptive data
+
+Means and standard deviations for neurocognitive task data and CBCL scores can be found in Table 2. Histograms
+for neurocognitive assessments are presented in Supplementary Figure 1. Histograms of CBCL outcomes are
+presented in Supplementary Figure 2.
+
+## Bayesian probabilistic principal components analysis
+
+The BPPCA algorithm was first implemented on subjects with complete data on all nine neurocognitive  measures.
+This reduced the sample to $N=$ 4,093 subjects. The demographic breakdown of subjects included in the analysis
+(Complete) and subjects excluded from analyses because of one or more missing neurocognitive measures
+(Incomplete) are given in Table 1. Complete data subjects do not differ meaningfully from subjects with
+one or more missing neurocognitive measures in terms of demographics. Table 2 presents summaries of the
+nine neurocognitive measures included in analyses, again by Complete and Incomplete status. 
+Levels of neurocognitive measures are similar but slightly lower for some measures in the Incomplete group.
+Histograms of the standardized neurocognition measures are displayed in Supplementary Figure 1.
+A sensitivity analysis displaying the BPCCA factor loadings on the full dataset of $N=$ 4,521 subjects
+after one missing data imputation is given in Supplementary Table 7.
+
+The model was run for each of $D=1$, $2$, $3$, and $4$, where $D$ denotes the number of retained components.
+There was a substantial improvement from
+$D=1$ (LOOIC = `r as.integer(round(looic.obj[5,6]))`, sd = `r as.integer(round(looic.obj[5,7]))`) to 
+$D=2$ (LOOIC = `r as.integer(round(looic.obj[4,6]))`, sd = `r as.integer(round(looic.obj[4,7]))`) and from 
+$D=2$ to $D=3$ (LOOIC = `r as.integer(round(looic.obj[3,6]))`, sd = `r as.integer(round(looic.obj[3,7]))`). 
+However, while the LOOIC for the four models was smallest for $D=4$
+(LOOIC = `r as.integer(round(looic.obj[2,6]))`, sd = `r as.integer(round(looic.obj[2,7]))`),
+the LOOIC for this model was well within one standard devation of the LOOIC
+for the model with $D=3$. We thus proceeded with the $D=3$ model on the principle of parsimony.
+In future work will investigate the replicability and predictive power of BPPCA models with more
+than three components.
+Component loadings for the three-component model after a varimax rotation are shown in Table 3, along with
+their $95\%$ posterior credible intervals. The posterior median variance explained by these three
+components was `r sprintf("%.1f",round(100*var_expl_vmx,1)[2])`%
+($95\%$ posterior credible interval:
+[`r sprintf("%.1f",round(100*var_expl_vmx,1)[1])`%, `r sprintf("%.1f",round(100*var_expl_vmx,1)[3])`%]). 
+The unrotated solution is presented in Supplementary Table 1a and the promax-rotated solution in Supplementary Table 1b. 
+Communalities and uniquenesses for the three-component varimax-rotated model are given in Supplementary Table 3.
+
+As shown in Table 3, the BPPCA findings indicated (a) a *General Ability* component (variance explained =
+`r sprintf("%.1f", 100*var_vmx_m[1,2]/9)`%,
+[`r sprintf("%.1f", 100*var_vmx_m[1,1]/9)`%, `r sprintf("%.1f", 100*var_vmx_m[1,3]/9)`%])
+with strongest loadings for the Toolbox Picture Vocabulary and Oral Reading tests, and more moderate loadings for the List Sort Working Memory 
+and Little Man tasks, (b) an *Executive Function* component 
+(`r sprintf("%.1f", 100*var_vmx_m[2,2]/9)`%
+[`r sprintf("%.1f", 100*var_vmx_m[2,1]/9)`%, `r sprintf("%.1f", 100*var_vmx_m[2,3]/9)`%])
+with strongest loadings from the Toolbox Flanker task, the Toolbox Dimensional Change Card
+Sort task, and the Toolbox Pattern Comparison Processing Speed task, and (c) a *Learning/Memory* component
+(`r sprintf("%.1f", 100*var_vmx_m[3,2]/9)`%
+[`r sprintf("%.1f", 100*var_vmx_m[3,1]/9)`%, `r sprintf("%.1f", 100*var_vmx_m[3,3]/9)`%])
+with strongest loadings from the Toolbox Picture Sequence Memory task and the RAVLT total number correct.
+The Toolbox List Sort Working Memory task was represented on both the *General Ability* component and the
+*Learning/Memory* component but not the *Executive Function* component.
+
+The posterior median of the data collection site random effect variance was 
+$\sigma^2_{a}$ = `r sprintf("%.3f", vc_tab[1,2])`
+[`r sprintf("%.3f", vc_tab[1,1])`, `r sprintf("%.3f", vc_tab[1,3])`]
+and the posterior median of the family random effect variance
+$\sigma^2_{b}$ = `r sprintf("%.3f", vc_tab[3,2])`
+[`r sprintf("%.3f", vc_tab[3,1])`, `r sprintf("%.3f", vc_tab[3,3])`]).
+Thus, component scores of subjects within the same site who are not siblings had a significant but low median
+correlation $r=$ `r sprintf("%.3f", vc_tab[1,2])`, and scores of subjects within families in the
+same site had a moderately high correlation of $r=$ `r sprintf("%.3f", (vc_tab[1,2]+vc_tab[3,2]))` 
+(= `r sprintf("%.3f", vc_tab[1,2])` + `r sprintf("%.3f", vc_tab[3,2])`3).
+The random effects variances for the residuals of data collection
+site (median $\sigma^2_{c}$ = `r sprintf("%.3f", vc_tab[2,2])` 
+[`r sprintf("%.3f", vc_tab[2,1])`, `r sprintf("%.3f", vc_tab[2,3])`]) 
+and family (median $\sigma^2_{d}$ = `r sprintf("%.3f", vc_tab[4,2])`
+[`r sprintf("%.3f", vc_tab[4,1])`, `r sprintf("%.3f", vc_tab[4,3])`]) 
+similarly demonstrated an over 10-fold higher covariance due to family than due to
+data collection site. See the Supplementary Materials for a detailed description of these parameters.
+
+Convergence for this model was acceptable for all parameters of interest  ($\hat{R} \approx 1$
+[@gelman2003bayesian]; also see Supplementary Figure 3 for variance components trace plots). To examine
+the stability of the three-component model, we randomly split the data in two halves and ran the BPPCA model
+separately on each half. Resulting loadings, displayed in Supplementary Tables 5 and 6, were 
+quite similar to the component loadings produced from the full data. Results of the completed data after imputation,
+given in Supplementary Table 7, are likewise quite similar to the results on the listwise complete sample of
+$N =$ 4,093 subjects.
+
+## Basic associations between PCA scores and CBCL measures
+
+PCA scores of the varimax-rotated components were extracted and correlated (Spearman’s rho) with three CBCL
+measures: Externalizing, Internalizing, and Stress Reactivity. Data summaries of these
+variables are given in Table 2, and histograms displayed in Supplementary Figure 2. Results of the 
+correlational analysis are displayed in Figure 1. As shown in the figure, CBCL measures were strongly
+intercorrelated. *General Ability* (PC1) was modestly negatively correlated with Externalizing and 
+Stress Reactivity. *Executive Function* (PC2) was negatively associated with
+Stress Reactivity most strongly with more minimal associations with Internalizing and
+Externalizing. *Learning/Memory* (PC3) exhibited the largest correlations (though these were still small in magnitude) 
+and was negatively associated with Externalizing and Stress Reactivity.
+
+## Association with CBCL problem behaviors after controlling for demographic variables
+
+Next, the PCA scores were placed as independent variables in GLMMs with the three CBCL measures,
+including fixed effects of socioeconomic and demographic variables and random effects of data collection site
+and family. Complete cases had slightly lower values on average for all three CBCL measures, most pronounced
+with Externalizing. Thus, we performed multiple imputation for missing component scores and demographic 
+variables and fit the GLMMs of five completed datasets, combining estimates using Rubin's formula for standard errors.
+Because the CBCL measures were highly skewed, we modeled them using the Gamma distribution
+with a log link function. As indicated in Table 4, lower *General Ability* (PC1) predicted higher levels of
+Externalizing, as well as Stress Reactivity after controlling for relevant demographic factors. Lower 
+*Executive Function* (PC2) was predictive of higher Internalizing as well as Stress Reactivity but was,
+unexpectedly, not associated with Externalizing tendencies. Lower levels of *Learning/Memory* (PC3) were
+predictive of higher externalizing tendencies. Demographic variables were also associated with CBCL outcomes.
+For instance, even within this narrow age band, older age was associated with higher Internalizing and
+Stress Reactivity symptoms. Males demonstrated higher levels of Stress Reactivity and
+Externalizing symptoms. Economic indicators of socioeconomic difficulty (e.g., lower incomes; single parent households) were
+generally associated with higher levels of problem behaviors. The change in adjusted R-squared from the baseline model
+(demographics and random effects of site and family) to the full model (baseline model plus all three component scores) were as follows:
+Externalizing: $\Delta R^2$ = `r 100*round(d_rsq[1],4)`%;
+Internalizing: $\Delta R^2$ = `r 100*round(d_rsq[2],4)`%; and 
+Stess Reactivity $\Delta R^2$ = `r 100*round(d_rsq[3],4)`%.
+Results of the GLMMs were thus consonant with correlations observed in Figure 1.
+
+We also performed the same GLMM analyses using 10-fold cross-validation to obtain out-of-sample prediction accuracy. 
+The change in out-of-sample squared correlation from the baseline model to the full model were as follows:
+Externalizing: $\Delta R^2$ = `r 100*round(d_rsq.cv[1],4)`%;
+Internalizing: $\Delta R^2$ = `r 100*round(d_rsq.cv[2],4)`%; and 
+Stess Reactivity $\Delta R^2$ = `r 100*round(d_rsq.cv[3],4)`%.
+
+
+### BPPCA model for NIH toolbox measures
+
+Because some researchers may be interested in using the Toolbox measures in isolation and to inform future studies, we repeated the analyses
+described above but limiting the analysis to only the seven NIH Toolbox measures. There were $N =$ 4,456 complete-data subjects in this analysis.
+Using the same LOOIC criterion for BPPCA model selection, we chose the model
+with $D=$ 3 components. Factor loadings for the three-component model after a varimax rotation are shown
+in Table 5.  The unrotated solution is given in the Supplementary Table 2.
+Communalities and uniquenesses for the three-component model are given in Supplementary Table 4.
+
+The posterior median variance explained by the three-component model was
+`r sprintf("%.1f",round(100*var_nihtb_expl_vmx,1)[2])`% 
+[`r sprintf("%.1f",round(100*var_nihtb_expl_vmx,1)[1])`%, `r sprintf("%.1f",round(100*var_nihtb_expl_vmx,1)[3])`%]). 
+The observed component structure was highly similar to what is described for the full set of measures:
+a *General Ability* component 
+(`r sprintf("%.1f", 100*var_nihtb_vmx_m[1,2]/9)`%
+[`r sprintf("%.1f", 100*var_nihtb_vmx_m[1,1]/9)`%, `r sprintf("%.1f", 100*var_nihtb_vmx_m[1,3]/9)`%])
+with strongest loadings on Oral Reading, Picture Vocabulary, and List Sort Working Memory tasks,
+an *Executive Function* component 
+(`r sprintf("%.1f", 100*var_nihtb_vmx_m[2,2]/9)`%
+[`r sprintf("%.1f", 100*var_nihtb_vmx_m[2,1]/9)`%, `r sprintf("%.1f", 100*var_nihtb_vmx_m[2,3]/9)`%])
+with strongest loadings on the Flanker, Dimensional Change Card Sort, and Pattern Comparison Processing Speed tasks,
+and a *Memory* component 
+(`r sprintf("%.1f", 100*var_nihtb_vmx_m[3,2]/9)`%
+[`r sprintf("%.1f", 100*var_nihtb_vmx_m[3,1]/9)`%, `r sprintf("%.1f", 100*var_nihtb_vmx_m[3,3]/9)`%])
+with strongest loadings on the Picture Sequence Memory and List Sort Working Memory tasks.
+The correlations between these components and those obtained from the more inclusive set of measures were as
+follows: *General Ability*, $r=.96$; *Executive Function*, $r=.99$; *Learning/Memory*, $r=.90$. 
+
+Spearman correlations of the 7-item BPPCA with CBCL outcomes and with the 9-item BPPCA solution are
+displayed in Figure 1, and associations of the PCA scores with CBCL outcomes from GLMMs are given in Table 6.
+The pattern of basic intercorrelations between the Toolbox-based components and CBCL variables were highly
+similar to what was observed for the full battery as are the GLMMs that control for demographic factors. 
+For these GLMMS, the change in adjusted R-squared from the baseline model to the full model were as follows:
+Externalizing: $\Delta R^2$ = `r 100*round(d_rsq_nihtbx[1],4)`%;
+Internalizing: $\Delta R^2$ = `r 100*round(d_rsq_nihtbx[2],4)`%; and 
+Stess Reactivity $\Delta R^2$ = `r 100*round(d_rsq_nihtbx[3],4)`%.
+
+As with the 9-item BPPCA, we performed the same GLMM analyses using 10-fold cross-validation to obtain out-of-sample prediction accuracy. 
+The change in out-of-sample squared correlation from the baseline model to the full model were as follows:
+Externalizing: $\Delta R^2$ = `r 100*round(d_rsq.cv.nihtbx[1],4)`%;
+Internalizing: $\Delta R^2$ = `r 100*round(d_rsq.cv.nihtbx[2],4)`%; and 
+Stess Reactivity $\Delta R^2$ = `r 100*round(d_rsq.cv.nihtbx[3],4)`%.
+
+# Discussion
+
+The goals of the current analyses were to establish the latent structure of the cognitive tests being administered
+as part of the ABCD study in middle childhood and examine associations between individual differences in these components
+and individual differences in domains of problem behavior at the study’s baseline, prior to the onset of more worrisome
+forms of adolescent risk-taking behavior.
+
+Using a PCA model, we found evidence for three broad components that appear to represent General Ability,
+Executive Function, and Learning/Memory. Our approach was exploratory in nature but with a robust solution
+that was replicated in a split-half analysis of the full sample. With respect to executive function, recent
+research using a latent variable approach suggests both unity and diversity of function given that separable
+but correlated factors have emerged in other studies that represent inhibition, behavioral flexibility, and working memory
+updating, respectively (see [@miyake2012nature] for review).
+
+Consistent with the notion that there is differentiation of cognitive ability from infancy to early adolescence,
+we found that executive function abilities in 9-10 year-olds are distinct from general cognitive abilities and from
+learning/memory processes [@brydges2014differentiation]. Thus, a single unitary factor does not underpin all abilities.
+However, this differentiation does not yet approach what is observed in adults given that measures of inhibition (Flanker Task),
+set-shifting (Dimensional Change Card Sort), and processing speed (Pattern Comparison Processing Speed task) load onto a common
+factor indicating unity of executive function in this age group as indexed by the NIH Toolbox measures of these processes.
+Other studies have similarly reported more “unity” versus “diversity” of executive function in young children [@weintraub2013nih;@wiebe2011structure].
+On the other hand, our finding that working memory, as measured by the List Sort Working Memory task, did not
+cohere with other measures of executive function was unexpected and suggests that this aspect of EF may begin
+to differentiate at an earlier age relative to other processes such as inhibition and cognitive flexibility.  
+
+Prior confirmatory factor analyses of the NIH Toolbox® in a sample of 267 8-15 year-olds [@mungas2013vii] and adults [@mungas2014factor],
+including numerous other validation measures such as the RAVLT, measures of visuospatial memory, achievement
+tests, and the Peabody Picture Vocabulary test (see @weintraub2013nih), found evidence for five broad factors
+that bear some similarities to those that emerged from our analyses [@mungas2013vii]. In contrast to our
+findings, the Toolbox® Picture Vocabulary and Oral Reading tests loaded on separate factors [@mungas2013vii].
+An Episodic Memory factor emerged that was similar
+to the Learning/Memory factor reported here with loadings from the Toolbox Picture Sequence Memory Test, the
+RAVLT, the Toolbox List Sort Working Memory Test, and other measures of visuospatial memory. An Executive
+Function factor also emerged that included the same three Toolbox® measures as found in our analyses.
+Mungas et al. [@mungas2013vii] found that the Toolbox List Sort Working Memory task loaded
+onto a separate Working Memory factor, together with other measures in this domain such as the Wechsler
+Letter-Number Sequencing Task and the Paced Serial Addition Task, neither of which is incorporated into the
+ABCD baseline battery. A similar confirmatory analysis that was focused only on adults (N = 268) found evidence
+for the invariance of the originally-reported five factor structure between the ages of 20 and 85 years [@mungas2014factor]. 
+The Toolbox® measures have been described by a composite score framework [@akshoomoff2013viii], which proposes a segregation into
+crystallized (Oral Reading, Picture Vocabulary) versus more fluid (all five other measures) components.
+This broad differentiation may not adequately characterize individuals in middle childhood and early adolescence
+given that fluid abilities segregated into two separate components in our analysis. 
+
+Overall, our findings from a considerably larger sample (albeit within a narrow age band) provide further
+validation of the factor structure of the NIH Toolbox® cognition battery. The three-component structure that we
+observed was maintained when the Toolbox® measures were analyzed in isolation, which is informative for those
+who might choose to use the battery in the absence of other measures. ABCD is capturing cognition
+at a precise developmental stage which may influence the cognitive structure and relevant associations that
+emerge from this sample given that working memory and other executive functions are rapidly developing during
+early adolescence [@luciana2005development;@luna2004maturation]. The longitudinal design of ABCD will enable granular
+characterization of dynamic change in the factor structure of cognitive ability across adolescent development
+in future assessment waves.
+
+A second major set of findings concern the basic associative structure between the latent factor scores and
+CBCL-based measures of problem behaviors. Prior to accounting for any sociodemographic factors, we found
+evidence for small-in-magnitude associations between cognitive abilities and domains of problem behaviors. When
+these patterns were examined in more detail through the use of GLMMs that modeled the impacts of demographic
+factors, these basic associations were generally maintained. The pattern that we observed for the prediction of
+externalizing behavior was somewhat unexpected given that externalizing was predicted by lower levels of
+General Ability as well as Learning/Memory but not by Executive Function. 
+The general ability component was most strongly represented by crystallized functions such as oral reading and
+picture vocabulary that may depend on educational attainment. In contrast, internalizing
+tendencies were associated with low levels of executive function (but not with poor learning/memory) in keeping
+with recent findings from both a meta-analysis of adult findings [@mcteague2016transdiagnostic] and clinical
+samples of adolescents suggesting that depression and anxiety are associated with executive dysfunction
+[@snyder2015advancing; @klimes2016regulatory]. 
+
+However, effect sizes for all of these respective associations are small in magnitude.  One possibility for the
+modest effect size may lie in a restriction of range, in that despite intentional targeting for recruitment of
+children from low-SES schools or other high-risk contexts, due to the substantial commitment required by
+enrollment in the ABCD study, the ABCD sample may nevertheless over-represent higher-functioning children and
+families. Notably, the mean scores of CBCL factors (especially externalizing) are somewhat lower than other
+normative samples, and substantially lower than in conduct disorder or other clinical samples. This does not
+diminish their potential significance given public health and educational implications at the population level,
+where even small effects suggest avenues for prevention and intervention.
+Indeed, the extent to which the patterning observed here is at odds with the literature is difficult to ascertain.
+Using one recent meta-analysis [@schoemaker2013executive] of 4021 preschoolers across 22 studies as an exemplar,
+ten of the included studies involved case-control categorical comparisons of EF function in children diagnosed with
+various externalizing disorders,
+such as Attention-Deficit Hyperactivity Disorder. This type of study is representative of the literature as a whole.
+Twelve of the included studies of children with behavior problems examined externalizing in a more dimensional fashion
+through methods such as symptom counts for discrete domains of psychopathology. The range of EF tasks varied from
+study-to-study from 1-6 measures. Importantly, it was observed that studies focused on referred clinical samples
+observed larger effect sizes (mean $r=0.39$) than those based on community samples (mean $r=0.18$) as did studies that
+included predominantly male samples. A stronger association between EF and externalizing was observed as behavior
+problems became more severe, suggesting non-linear associations between the two constructs. We hypothesize that
+this same patterning would be observed in the ABCD sample over time. Our findings suggest that in the population as a
+whole where externalizing problems have not necessarily reached clinical levels of magnitude, the linear associations
+between externalizing and EF are non-significant.
+
+Within the literature as a whole, potential associations between internalizing and cognitive function have not been as
+well characterized, though there is increasing interest in case-control comparisons of EF in clinical samples with mood
+and anxiety disorders [@klimes2016regulatory]. Those studies have focused on aspects of EF that include affective regulation, which is not
+among the constructs assessed to date in the ABCD study sample. It may be that effect sizes will be stronger between
+domains of problem behavior and more affectively salient EF measures, as observed in some studies [@woltering2016executive].
+
+
+These findings also provide evidence for a premorbid association between cognitive function and mood/behavior abnormalities
+found in cross-sectional comparisons in adults [@mcteague2016transdiagnostic], where the relationships we describe here are devoid
+of the confound of neurotoxicity from substance use that is endemic in mental illness. A major question in the field has concerned
+whether associations between cognitive functions (e.g., executive function) and problem behaviors such as externalizing exist prior
+to the onset of risk-taking behaviors such as substance use that frequently emerge in later adolescence and if so, how strong the
+associations are in the context of the pubertal transition. Our findings indicate that these associations are small in magnitude 
+at the population level. Moreover, our findings reinforce the merits of controlling, via population-based sampling and
+sophisticated statistical modeling, for the influences of sociodemographic factors. Finally, ABCD neuroimaging will enable discovery of
+variations in neurocircuitry that may contribute to the interpretation of these relationships.  
+
+While not the primary focus of this paper, we note that socioeconomic indices, such as participant sex, 
+parental marital status, family income, and parental education levels, were independently predictive of
+children’s problem behaviors, accounting in many cases for larger proportions of the variance in these outcomes
+than cognitive functioning. As the ABCD study continues to follow this cohort, it will be important to remain
+cognizant of the importance of these sociodemographic factors in the interpretation of health outcome behaviors
+and their correlates over the course of development.
+
+## Limitations
+
+While the ABCD baseline assessment is comprehensive, it does not include the full range of validation measures
+that were included in the NIH Toolbox® validation studies. Thus, the factor structure that we observed may be
+more nuanced when evaluated in the context of a more representative set of measures, particularly those that more
+strongly capture working memory performance as well as inhibitory control.
+That said, the overlap between these findings and those reported in the
+validation studies is encouraging and lends confidence in the abbreviated, automated, and economically-feasible
+assessment that ABCD has undertaken. Another limitation concerns the limited age range of the sample. While the
+reported age band is narrow, there is a wide range of individual differences that can be assessed for their
+influence on developmental outcomes as the project advances. Parent-based CBCL ratings were used as outcome
+variables in this analysis, and these ratings may be biased in some respects (e.g., in their associations with
+socioeconomic variables) or less sensitive in others (e.g., with respect to the reporting of internalizing
+versus externalizing behaviors). At subsequent assessment points, children will provide self-report ratings in
+addition to parent reports, allowing further validation of parental reports. Finally, a potential confound
+within our analyses is that participant race/ethnicity is conflated with socioeconomic status in that racial
+minorities who are ABCD participants tend to be in relatively lower income and education groups while
+volunteers in the racial/ethnic majority tend to be of higher education and income levels. This is a sampling
+bias and not reflective of the full U.S. population. The data presented here are derived from ABCD’s first wave of
+assessment, representing less than half of the full baseline sample of 11,872 individuals. A disentangling of these
+influences was a goal in recruiting the second half of the baseline sample. Finally, this analysis focuses on main
+effects without consideration of interactions that may moderate the associations between cognition and problem behaviors. 
+
+## Conclusions
+
+This analysis sets the stage for future analyses of cognitive ability in an epidemiologically-informed cohort
+of young adolescents, supporting the existence of separable measures of general ability, executive function,
+and learning/memory. Associations with problem behaviors are, at present, small in magnitude, which is an
+important finding given that such associations may increase in magnitude as the sample ages into the period of
+higher risk for behaviors such as substance misuse.
+
+
+# Acknowledgments
+
+We thank the families who have participated in this research. We are grateful to Susan Tapert, Ph.D. who has
+expertly guided the work of ABCD’s assessment workgroups, as well as Margie Mejia-Hernandez for her support to
+the ABCD Workgroup on Neurocognition. This work was supported by the following grants from the United States
+National Institutes of Health, National Institute on Drug Abuse: 1U24DA041123-01 (Dale),
+U01DA041120 (Luciana, Barch, Bjork), U01DA041148 (Nagel), U01 DA041156 (Gonzalez), and
+U01DA041106 (Nixon).
+
+####### Page Break
+
+**Table 1: Demographics for Complete-Data and Incomplete-Data Subjects**
+```{r table1, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab1, type="html")
+```
+Group differences are tested using two-sample t-test with equal variance assumption for continuous variables
+and $\chi^2$ tests for discrete variables.
+
+####### Page Break
+
+**Table 2: Neurocognitive Assessments**
+```{r table2, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab2, type="html")
+```
+Group differences are tested using two-sample t-test with equal variance assumption.
+
+####### Page Break
+
+**Table 3: Varimax Rotated Loadings for Three-Factor Model**
+```{r table3, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab3, type="html")
+
+```
+Pic Vocab = Toolbox Picture Vocabulary; Flanker = Toolbox Flanker Test; List Sort = Toolbox List Sort Working Memory Task; Card Sort = Dimensional Change Card Sort Task; Pattern = Toolbox Pattern Comparison Processing Speed Task; Picture = Toolbox Picture Sequence Memory Task; Reading = Toolbox Oral Reading Test; RAVLT = Rey Auditory Verbal Learning Task, total correct; LMT = Little Man Task percent correct. For Toolbox measures, 
+uncorrected scores were entered into the analysis.  
+Loadings above 0.40 are highlighted; this is intended solely to assist with simple description of the factors,
+and does not enter into follow-up analyses in any fashion. Quantiles are from the posterior draws of the MCMC algorithm for each factor loading after
+varimax rotation and give the middle 95% of the distribution of the loadings (i.e., 95% posterior credible intervals).
+ 
+####### Page Break
+
+**Table 4: Regression of CBCL Measures on Varimax-Rotated Factors**
+```{r table4, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab4, type="html")
+```
+
+####### Page Break
+
+**Table 5: NIH Toolbox Varimax Rotated Loadings for Three-Factor Model**
+```{r table5, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab5, type="html")
+```
+Pic Vocab = Toolbox Picture Vocabulary; Flanker = Toolbox Flanker Test; List Sort = Toolbox List Sort Working Memory Task; Card Sort = Dimensional Change Card Sort Task; Pattern = Toolbox Pattern Comparison Processing Speed Task; Picture = Toolbox Picture Sequence Memory Task; Reading = Toolbox Oral Reading Test.  
+Loadings above 0.40 are highlighted; this is intended solely to assist with simple description of the factors,
+and does not enter into follow-up analyses in any fashion. Quantiles are from the posterior draws of the MCMC algorithm for each factor loading after
+varimax rotation and give the middle 95% of the distribution of the loadings (i.e., 95% posterior credible intervals).
+
+ 
+####### Page Break
+
+**Table 6: Regression of CBCL Measures on NIH Toolbox Varimax-Rotated Factors**
+```{r table6, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab6, type="html")
+```
+
+####### Page Break
+
+**Figure 1: Spearman Correlation of Scores from BPPCA and CBCL Outcomes**
+![](r_code/figures_and_tables/fig1.pdf)
+
+PC1= General Ability Factor; PC2=Executive Function Factor; PC3=Learning/Memory Factor; NIHTB_PC1= Toolbox-derived General Ability factor; NIHTB_PC2= Toolbox-derived Executive Function factor; NIHTB_PC3= Toolbox-derived Learning/Memory factor; Total= CBCL Total Problem score; Externalizing = CBCL externalizing score; Internalizing= CBCL Internalizing; Stress= CBCL Stress Reactivity score. Heat maps represent the magnitude of Spearman’s rho correlation coefficients.  P-values are not presented. 
+
+####### Page Break
+
+# Supplementary Materials
+
+**Bayesian Probabilistic Principal Components Model**
+
+Let $\boldsymbol{Y}_i$ denote the $P$-dimensional vector of neurocognitive
+measures for the $i$th subject, for $i = 1,\ldots, N$, with $N$ denoting the total sample size. 
+We modeled the covariance structure of $\boldsymbol{Y}_i$ using a standard latent variable formulation
+$$\begin{eqnarray} 
+\boldsymbol{Y}_i &  = & \Lambda \boldsymbol{\theta}_i + \boldsymbol{\epsilon}_i, 
+\end{eqnarray}$$
+where $\Lambda$ is a $P \times D$ matrix, $D \le P$ is the number of latent variables, 
+$\boldsymbol{\theta}_i$ is the $D$-dimensional vector of latent scores for the $i$th subject,
+and $\boldsymbol{\epsilon}_i$ is the $P$-dimensional vector of residuals. We assumed that
+$\boldsymbol{\theta}_i$ were marginally normal with zero mean and unit variance,
+indicated by $\boldsymbol{\theta}_i \sim \mbox{N}_D(\boldsymbol{0}, I_D)$, where
+$\mbox{N}_D(\boldsymbol{\mu},\Sigma)$ denotes a $D$-dimensional normal distribution with 
+mean $\boldsymbol{\mu}$ and variance-covariance matrix $\Sigma$, $\boldsymbol{0}$ is a 
+D-dimensional vector of zeros and $I_D$ is the $D \times D$ identity matrix. We further assumed
+that the residuals were marginally distributed as $\boldsymbol{\epsilon}_i \sim
+\mbox{N}_P(\boldsymbol{0},\sigma^2_{\epsilon} I_P)$. This model forms the basis for
+Probabilistic PCA [@tipping1999probabilistic;@bishop1999bayesian].
+
+We incorporated the study design of ABCD into the analysis via random effects for data collection site
+and for family for subjects with one or more siblings included in the study. Random effects thus accounted
+for correlation among the responses between subjects caused by nesting within site and within family.
+Random effects were included in both the latent scores $\boldsymbol{\theta}_i$ and the residuals
+$\boldsymbol{\epsilon}_i$, with variances constrained to meet the identifiability assumptions of the BPPCA model. 
+
+First, we describe the random effects for the latent scores. For singletons (subjects without siblings
+in the study) we modeled the latent score
+$\boldsymbol{\theta}_i$ as
+$$\begin{eqnarray} 
+\boldsymbol{\theta}_i &  = & \boldsymbol{\delta}_i + \boldsymbol{a}_{s(i)} ,
+\end{eqnarray}$$
+where $\boldsymbol{\delta}_i$ and $\boldsymbol{a}_{s(i)}$ are independent,
+$s(i)$ denotes the site of collection of the $i$th subject,
+$\boldsymbol{\delta}_i \sim \mbox{N}_D(\boldsymbol{0},\sigma^2_{\delta} I_D)$, and
+$\boldsymbol{a}_{s(i)} \sim \mbox{N}_D(\boldsymbol{0},\sigma^2_{a} I_D)$. 
+The overall variance of each component of $\boldsymbol{\theta}_i$ is thus $\sigma^2_{\delta} + \sigma^2_{a} =1$.
+As indicated, this quantity was constrained to equal one, necessary for identifiability.
+For subjects with one or more siblings, we modeled the latent scores as
+$$\begin{eqnarray} 
+\boldsymbol{\theta}_i &  = & \boldsymbol{\gamma}_i + \boldsymbol{a}_{s(i)} + \boldsymbol{b}_{f(i)},
+\end{eqnarray}$$
+where $\boldsymbol{\gamma}_i$, $\boldsymbol{a}_{s(i)}$, and $\boldsymbol{b}_{f(i)}$ are mutually independent,
+$f(i)$ denotes the family of the $i$th subject,
+$\boldsymbol{\gamma}_i \sim \mbox{N}_D(\boldsymbol{0},\sigma^2_{\gamma} I_D)$,
+$\boldsymbol{a}_{s(i)}$ is distributed as before, and
+$\boldsymbol{b}_{f(i)} \sim \mbox{N}_D(\boldsymbol{0},\sigma^2_{b} I_D)$.
+We again made the constraint that $\sigma^2_{\gamma}+\sigma^2_{a} + \sigma^2_{b}=1$.
+Thus, marginally $\boldsymbol{\theta}_i \sim \mbox{N}_D(\boldsymbol{0},I_D)$ in all cases, but with 
+random effects $\boldsymbol{a}_{s(i)}$ and $\boldsymbol{b}_{f(i)}$ capturing the correlation
+of latent scores within sites and within families, respectively.
+
+The random effects structure of the residuals $\boldsymbol{\epsilon}_i$ was similar and captures the
+correlation within site and family in the responses not accounted for by the latent scores. For 
+singleton subjects
+$$\begin{eqnarray} 
+\boldsymbol{\epsilon}_i &  = & \boldsymbol{\xi}_i + \boldsymbol{c}_{s(i)},
+\end{eqnarray}$$
+where $\boldsymbol{\xi}_i \sim \mbox{N}_P(\boldsymbol{0},\sigma^2_{\xi} I_P)$ independently of
+$\boldsymbol{c}_{s(i)} \sim \mbox{N}_P(\boldsymbol{0},\sigma^2_{c} I_P)$. Finally, for subjects
+with one or more siblings in the study
+$$\begin{eqnarray} 
+\boldsymbol{\epsilon}_i &  = & \boldsymbol{\zeta}_i + \boldsymbol{c}_{s(i)} + \boldsymbol{d}_{f(i)},
+\end{eqnarray}$$
+where all three random variables are mutually independent, $\boldsymbol{c}_{s(i)}$ is distributed as before,
+$\boldsymbol{\zeta}_i \sim \mbox{N}_P(\boldsymbol{0},\sigma^2_{\zeta}I_P)$, and
+$\boldsymbol{d}_{f(i)} \sim \mbox{N}_P(\boldsymbol{0},\sigma^2_{d}I_P)$. We placed the constraint that
+$\sigma^2_{\xi} + \sigma^2_{c} = \sigma^2_{\zeta} + \sigma^2_{c} + \sigma^2_{d}$, ensuring that the 
+marginal distribtion of $\boldsymbol{\epsilon}_i$ remains constant across subjects.
+
+After selecting the number $D$ of the latent factors, the BPPCA was rotationally invariant.
+To address this issue, we performed *post hoc* 
+orientation of the loading matrix $\Lambda$ and latent scores $\boldsymbol{\theta}_i$ using the method
+described in @lockwood2015inferring. 
+
+####### Page Break
+
+**Supplementary Table 1A: Unrotated BPPCA Factor Loadings**
+```{r table_sm1a, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab_sm1a, type="html")
+```
+
+####### Page Break
+
+**Supplementary Table 1B: Promax Rotated BPPCA Factor Loadings**
+```{r table_sm1b, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab_sm1b, type="html")
+```
+
+####### Page Break
+
+**Supplementary Table 2a: Unrotated NIH Toolbox BPPCA Factor Loadings**
+```{r table_sm2a, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab_sm2a, type="html")
+```
+
+####### Page Break
+
+**Supplementary Table 2b: Promax-rotated NIH Toolbox BPPCA Factor Loadings**
+```{r table_sm2b, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab_sm2b, type="html")
+```
+
+####### Page Break
+
+**Supplementary Table 3: Communalities and Uniquenesses for BPPCA Model**
+```{r table_sm3, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab_sm3, type="html")
+```
+
+
+####### Page Break
+
+**Supplementary Table 4: Communalities and Uniquenesses for NIH Toolbox BPPCA Model**
+```{r table_sm4, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab_sm4, type="html")
+```
+
+####### Page Break
+
+**Supplementary Table 5: Varimax-Rotated Factor Loadings for First Split-Half BPPCA Model**
+```{r table_sm5, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab_sm5, type="html")
+```
+
+####### Page Break
+
+**Supplementary Table 6: Varimax-Rotated Factor Loadings for Second Split-Half BPPCA Model**
+```{r table_sm6, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab_sm6, type="html")
+```
+
+####### Page Break
+
+**Supplementary Table 7: Varimax-Rotated Factor Loadings for Imputed BPPCA Model**
+```{r table_sm7, results='asis', tidy=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+print(tab_sm7, type="html")
+```
+
+
+####### Page Break
+
+**Supplementary Figure 1: Density Histograms of Standardized Neurocognitive Measures**
+![](r_code/figures_and_tables/fig_sm1.pdf)
+
+####### Page Break
+
+**Supplementary Figure 2: Density Histograms of CBCL Outcomes**
+![](r_code/figures_and_tables/fig_sm2.pdf)
+
+####### Page Break
+
+**Supplementary Figure 3: Trace Plots for BPPCA Variance Components**
+![](r_code/figures_and_tables/fig_sm3.pdf)
+
+####### Page Break
+
+# Bibliography
+
+```{yam1, echo=FALSE}
+---
+bibliography: "biobliography.bib"
+output:
+  word_document
+---
+```
