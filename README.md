@@ -5,6 +5,5 @@
 # The R script is "abcd_baseline_np_analyses_final.R"
 # This calls the stan script "bppca.stan" for running the BPPCA model.
 # All tables and figures used in the paper are also included.
-# The repository also contains the R MARKDOWN script (abcd_baseline_np_analyses_final.Rmd) for creating the entire manuscript,
-# including the Supplementary Materials.
+# The repository also contains the R MARKDOWN script (abcd_baseline_np_analyses_final.Rmd) for creating the entire manuscript, including the Supplementary Materials.
  
