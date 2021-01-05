@@ -756,7 +756,7 @@ print(tab6, type="html")
 ####### Page Break
 
 **Figure 1: Spearman Correlation of Scores from BPPCA and CBCL Outcomes**
-![](r_code/figures_and_tables/fig1.pdf)
+![](fig1.pdf)
 
 PC1= General Ability Factor; PC2=Executive Function Factor; PC3=Learning/Memory Factor; NIHTB_PC1= Toolbox-derived General Ability factor; NIHTB_PC2= Toolbox-derived Executive Function factor; NIHTB_PC3= Toolbox-derived Learning/Memory factor; Total= CBCL Total Problem score; Externalizing = CBCL externalizing score; Internalizing= CBCL Internalizing; Stress= CBCL Stress Reactivity score. Heat maps represent the magnitude of Spearman’s rho correlation coefficients.  P-values are not presented. 
 
@@ -907,17 +907,17 @@ print(tab_sm7, type="html")
 ####### Page Break
 
 **Supplementary Figure 1: Density Histograms of Standardized Neurocognitive Measures**
-![](r_code/figures_and_tables/fig_sm1.pdf)
+![](fig_sm1.pdf)
 
 ####### Page Break
 
 **Supplementary Figure 2: Density Histograms of CBCL Outcomes**
-![](r_code/figures_and_tables/fig_sm2.pdf)
+![](fig_sm2.pdf)
 
 ####### Page Break
 
 **Supplementary Figure 3: Trace Plots for BPPCA Variance Components**
-![](r_code/figures_and_tables/fig_sm3.pdf)
+![](fig_sm3.pdf)
 
 ####### Page Break
 
