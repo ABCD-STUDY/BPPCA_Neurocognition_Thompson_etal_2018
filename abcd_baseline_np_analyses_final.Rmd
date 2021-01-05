@@ -54,7 +54,7 @@ cleanbib()
 options("citation_format" = "pandoc")
 knitr::opts_chunk$set(echo = TRUE)
 
-load("r_code/figures_and_tables/bppca_tables_final.RData")
+load("bppca_tables_final.RData")
 B = dim(beta.boot)[3]
 ```
 
